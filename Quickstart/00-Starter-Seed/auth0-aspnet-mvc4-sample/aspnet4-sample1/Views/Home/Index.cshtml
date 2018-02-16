@@ -10,6 +10,10 @@
     @if (User.Identity.IsAuthenticated)
     {
         <p>Welcome, @ViewBag.Name!</p>
+        <fieldset>
+            <legend>This is from ShadowSync:</legend>
+            <pre font-size:small;">@ViewBag.ShadowSyncUserInfo</pre>    
+        </fieldset>                
         <p><a href="/Account/Logout" class="btn btn-primary btn-lg">Logout</a></p>
     }
     else {

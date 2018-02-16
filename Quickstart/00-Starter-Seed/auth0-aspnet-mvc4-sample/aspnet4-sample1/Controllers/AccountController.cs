@@ -24,10 +24,10 @@ namespace aspnet4_sample1.Controllers
                 .WithClient(ConfigurationManager.AppSettings["auth0:ClientId"])
                 .WithRedirectUrl(redirectUri.ToString())
                 .WithResponseType(AuthorizationResponseType.Code)
-                .WithScope("openid profile")
+                .WithScope("openid profile");
                 // adding this audience will cause Auth0 to use the OIDC-Conformant pipeline
                 // you don't need it if your client is flagged as OIDC-Conformant (Advance Settings | OAuth)
-                .WithAudience("https://" + @ConfigurationManager.AppSettings["auth0:Domain"] + "/userinfo");
+                //.WithAudience("https://" + @ConfigurationManager.AppSettings["auth0:Domain"] + "/userinfo");
 
             if (!string.IsNullOrEmpty(returnUrl))
             {

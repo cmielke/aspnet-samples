@@ -10,6 +10,7 @@ namespace aspnet4_sample1
     using System.IdentityModel.Services;
     using System.Linq;
     using System.Web;
+    using Newtonsoft.Json.Linq;
 
     public class LoginCallback : HttpTaskAsyncHandler
     {
@@ -28,19 +29,29 @@ namespace aspnet4_sample1
 
             var profile = await client.GetUserInfoAsync(token.AccessToken);
 
-            var user = new List<KeyValuePair<string, object>>
+            JToken emdatSessionKey, shadowsyncurl;
+            if (profile.AdditionalClaims.TryGetValue("https://emdat.com/shadowsync/session_key", out emdatSessionKey) &&
+                profile.AdditionalClaims.TryGetValue("https://emdat.com/shadowsync/url", out shadowsyncurl))
             {
-                new KeyValuePair<string, object>("name", profile.FullName ?? profile.PreferredUsername ?? profile.Email),
-                new KeyValuePair<string, object>("email", profile.Email),
-                new KeyValuePair<string, object>("family_name", profile.LastName),
-                new KeyValuePair<string, object>("given_name", profile.FirstName),
-                new KeyValuePair<string, object>("nickname", profile.NickName),
-                new KeyValuePair<string, object>("picture", profile.Picture),
-                new KeyValuePair<string, object>("user_id", profile.UserId),
-                new KeyValuePair<string, object>("id_token", token.IdToken),
-                new KeyValuePair<string, object>("access_token", token.AccessToken),
-                new KeyValuePair<string, object>("refresh_token", token.RefreshToken)
-            };
+                string key = emdatSessionKey.ToObject<string>();
+                string url = shadowsyncurl.ToObject<string>();
+                context.Response.SetCookie(new HttpCookie("ShadowSyncKey", key));
+                context.Response.SetCookie(new HttpCookie("ShadowSyncUrl", url));
+            }
+
+            var user = new List<KeyValuePair<string, object>>
+                {
+                    new KeyValuePair<string, object>("name", profile.FullName ?? profile.PreferredUsername ?? profile.Email),
+                    new KeyValuePair<string, object>("email", profile.Email),
+                    new KeyValuePair<string, object>("family_name", profile.LastName),
+                    new KeyValuePair<string, object>("given_name", profile.FirstName),
+                    new KeyValuePair<string, object>("nickname", profile.NickName),
+                    new KeyValuePair<string, object>("picture", profile.Picture),
+                    new KeyValuePair<string, object>("user_id", profile.UserId),
+                    new KeyValuePair<string, object>("id_token", token.IdToken),
+                    new KeyValuePair<string, object>("access_token", token.AccessToken),
+                    new KeyValuePair<string, object>("refresh_token", token.RefreshToken)
+                };
 
             // NOTE: Uncomment the following code in order to include claims from associated identities
             //profile.Identities.ToList().ForEach(i =>
@@ -70,6 +81,7 @@ namespace aspnet4_sample1
                     context.Response.Redirect(redirectUrl, true);
                 }
             }
+
 
             context.Response.Redirect("/");
         }
